@@ -93,4 +93,3 @@ static void edu_raise_irq(EduState *edu, uint32_t val)
 
 다음 편에서는 이 스펙을 바탕으로 실제 첫 PCI 드라이버(probe/BAR 매핑/레지스터 read)를
 짠다.
-</content>

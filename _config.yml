@@ -4,16 +4,15 @@ baseurl: ""
 url: "https://grapesgun67.github.io"
 lang: ko
 
-theme: minima
-minima:
-  skin: dark
-
+# 테마 없이 직접 만든 레이아웃(_layouts/, assets/css/)만 사용
 plugins:
   - jekyll-seo-tag
   - jekyll-sitemap
 
 markdown: kramdown
+kramdown:
+  syntax_highlighter: rouge
 permalink: /:year/:month/:day/:title/
 
-author:
-  name: grapesgun67
+author: grapesgun67
+github_url: "https://github.com/grapesgun67/bsp_device_driver"

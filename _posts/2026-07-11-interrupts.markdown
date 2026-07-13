@@ -87,4 +87,3 @@ complete(&edu->done);              // 여기서 깨움
 교훈으로 이어진다).
 
 다음 편은 DMA — 그리고 QEMU가 DMA를 100ms 뒤에 비동기로 처리한다는 걸 몰라서 겪은 삽질.
-</content>

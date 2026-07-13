@@ -88,4 +88,3 @@ pci_set_master(pdev);   // 이거 빼먹으면 DMA가 조용히 no-op이 된다
 
 다음 편(마지막)은 이 모든 걸 기반으로 내 장치(vecadd)를 직접 설계하고, char device +
 ioctl + mmap으로 유저스페이스까지 연결하는 이야기.
-</content>

@@ -1,0 +1,18 @@
+---
+layout: default
+---
+<div class="home-intro">
+  {{ content }}
+</div>
+
+<ul class="post-list">
+  {% for post in site.posts %}
+  <li class="post-list-item">
+    <span class="post-list-date">{{ post.date | date: "%Y-%m-%d" }}</span>
+    <a class="post-list-title" href="{{ post.url | relative_url }}">{{ post.title }}</a>
+    {% if post.description %}
+    <p class="post-list-desc">{{ post.description }}</p>
+    {% endif %}
+  </li>
+  {% endfor %}
+</ul>
