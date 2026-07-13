@@ -1,0 +1,117 @@
+---
+layout: post
+title: "QEMU로 PCIe 가속기 드라이버 바닥부터 ⑤ — 내 장치 저작, 그리고 런타임"
+date: 2026-07-13 09:00:00 +0900
+categories: driver linux-kernel char-device
+description: "edu를 포크해 내 가속기 장치를 설계하고, char device + ioctl + mmap으로 유저스페이스까지 연결한다. 가장 오래 걸린 버그: NULL이 아니라 ERR_PTR."
+---
+
+## edu를 포크해서 내 장치 만들기
+
+edu로 PCI 열거/MMIO/인터럽트/DMA를 다 익힌 뒤, 진짜 "pre-silicon" 워크플로의 핵심으로
+넘어갔다 — **내가 하드웨어(장치 쪽)를 직접 설계**하고, 그 하드웨어에 맞는 드라이버를
+짜는 것. `hw/misc/edu.c`를 참고해서 새 장치 `vecadd`(PCI ID `1234:11e9`)를 만들었다.
+
+edu와의 핵심 차이는 레지스터 맵 설계 철학이다. edu는 "DMA 엔진"과 "팩토리얼 계산기"가
+서로 완전히 무관한 별개 기능이었다(한 칩에 우연히 같이 있는 것뿐). vecadd는 이 둘을
+하나의 **작업(job)**으로 통합했다 — 입력 A, B 주소를 레지스터에 써주면, 장치가 알아서
+DMA로 읽어와 원소별로 더하고, 결과를 출력 주소로 DMA out 한다. 실제 가속기(행렬곱
+유닛 등)가 동작하는 방식에 훨씬 가깝다.
+
+```
+0x08 (8B) input A 버스주소     0x20 length
+0x10 (8B) input B 버스주소     0x24 command (시작/인터럽트)
+0x18 (8B) output 버스주소      0x28 status
+```
+
+레지스터 맵을 처음 설계할 때 8바이트 주소 필드끼리 4바이트 간격으로 배치했다가,
+edu의 DMA 레지스터들이 왜 8바이트 간격이었는지를 뒤늦게 떠올리고 고쳤다 — 64비트
+주소 하나가 다음 필드를 침범하면 안 된다.
+
+## char device + ioctl + mmap
+
+지금까진 `insmod`하면 `probe()` 안에서 하드코딩된 테스트 데이터로 자동으로 한 번
+계산하고 끝났다. 진짜 쓸모있으려면 유저스페이스가 "이 데이터로 계산해줘"라고 요청할
+창구가 필요하다.
+
+**`ioctl`**: 유저→커널로 "몇 개 원소를 더할지" 전달. `copy_from_user`로 구조체를
+복사해오고, 완료될 때까지 `wait_for_completion`으로 블로킹한다.
+
+**`mmap`**: 원래 mmap의 `offset` 인자는 "파일 내용의 몇 바이트째부터"를 뜻하는 게
+관례지만, 디바이스 드라이버는 이 자리를 자기 필요에 맞게 재해석해도 된다(실제로 GPU
+드라이버 등에서 흔히 쓰는 패턴). vecadd는 `vma->vm_pgoff`를 "A/B/C 중 어떤 버퍼를
+달라는 건지" 선택자로 재활용했다:
+
+```c
+switch (vma->vm_pgoff) {
+case 0: /* A */ ...
+case 1: /* B */ ...
+case 2: /* C */ ...
+}
+vma->vm_pgoff = 0;   // dma_mmap_coherent 자체 용도로 다시 쓰이니 리셋
+return dma_mmap_coherent(&pdev->dev, vma, virt, phy, size);
+```
+
+이렇게 하면 유저 프로세스가 `mmap`으로 받은 포인터에 값을 쓰는 것이 곧 장치가 DMA로
+읽어갈 그 메모리를 직접 쓰는 것이 된다 — `copy_from_user` 없는 진짜 zero-copy.
+
+## 가장 오래 걸린 버그 — NULL이 아니라 ERR_PTR
+
+`mmap`이 계속 `ENXIO`로 실패했다. `PAGE_ALIGN`(mmap은 항상 페이지 단위로 반올림하는데,
+`dma_alloc_coherent`/`dma_mmap_coherent`에 넘기는 크기가 안 맞았던 것)로 그 문제는
+고쳤는데, 그 다음부턴 재로드할 때마다 `kobject_add_internal failed ... -EEXIST`가 나기
+시작했다. 게다가 mmap된 버퍼의 데이터를 확인해보면 원소 개수가 `0`으로 읽혔다 — 분명
+`probe()`에서 `30`으로 세팅했는데.
+
+`dmesg`의 전체 콜스택까지 다 읽고 나서야 진짜 원인을 찾았다:
+
+```c
+if (device_create(cls, NULL, devno, NULL, "vecadd")) {   // 버그
+    ret = -ENODEV;
+    goto err_unmap;
+}
+```
+
+`device_create()`는 실패하면 `NULL`이 아니라 **`ERR_PTR`**(역시 non-NULL인 특수 포인터
+값)을 리턴한다. 그러니까 이 `if`문은 **성공이든 실패든 항상 참**이었다. 실제로는 장치
+노드가 정상적으로 만들어졌는데도, 코드는 그걸 실패로 착각해서 `goto err_unmap`으로
+튀었고 — 이 경로는 `cdev_del`을 건너뛴 채로 `kfree(m_vecadd)`까지 흘러갔다. 결과는
+**이미 등록된 `/dev/vecadd`가 해제된 메모리를 가리키는 좀비 디바이스**였다. 그래서
+`open()`은 (죽지 않은 파일이니) 성공하는데, 그 안의 데이터는 전부 0으로 읽혔던 것이고,
+`sysfs`에 정리 안 된 등록이 남아 재로드마다 이름 충돌이 났던 것이다.
+
+```c
+struct device *dev_ret = device_create(cls, NULL, devno, NULL, "vecadd");
+if (IS_ERR(dev_ret)) {         // 올바른 실패 판정
+    ret = PTR_ERR(dev_ret);
+    goto err_chrdev;
+}
+```
+
+교훈: **커널 API 중 실패를 `NULL`이 아니라 `ERR_PTR`로 표현하는 함수들이 있다
+(`class_create`, `device_create` 등). 포인터를 리턴하는 함수는 습관적으로 `IS_ERR()`로
+체크해야지, `if (ptr)` 같은 truthy 체크를 쓰면 안 된다.**
+
+## 끝에서 끝까지
+
+```
+유저: open("/dev/vecadd") → mmap(A,B,C) → A,B에 값 쓰기 → ioctl(SUBMIT)
+드라이버: 레지스터 세팅 → 시작 → wait_for_completion (블로킹)
+장치: DMA-in → a[i]+b[i] 계산 → DMA-out → 인터럽트
+드라이버: ack → complete()
+유저: ioctl() 리턴 → mmap된 C 포인터에서 결과 바로 읽음 (복사 없음)
+```
+
+`strace`로 보면 이 전체 흐름이 몇 줄로 요약된다:
+```
+mmap(NULL, 4096, ..., MAP_SHARED, fd, 0)         # A
+mmap(NULL, 4096, ..., MAP_SHARED, fd, 0x1000)    # B
+mmap(NULL, 4096, PROT_READ, MAP_SHARED, fd, 0x2000)  # C
+ioctl(fd, _IOC(_IOC_WRITE, 'V', 1, 4), &job)
+```
+
+QEMU 소스를 읽는 것부터 시작해서, 없는 드라이버를 처음부터 짜고, 없는 하드웨어까지
+직접 설계해본 프로젝트였다. 전체 소스는
+[github.com/grapesgun67/bsp_device_driver](https://github.com/grapesgun67/bsp_device_driver)에
+있다.
+</content>
