@@ -1,0 +1,95 @@
+---
+layout: post
+title: "RPi5 ↔ Nucleo SPI DMA 드라이버 바닥부터 ③ — 16바이트는 영원히 PIO였다"
+date: 2026-07-19 09:20:00 +0900
+categories: driver linux-kernel spi dma ftrace
+description: "DMA 채널이 DT에 있어도 전송이 DMA를 안 탈 수 있는 이유. FIFO 임계값을 소스로 찾아내고, ftrace로 PIO→DMA 전환을 실제로 증명하기까지."
+---
+
+[지난 편]({% post_url 2026-07-19-lv2-char-driver-irq %})에서 GPIO 인터럽트 기반
+이벤트 구조를 완성했다. 이번 편의 목표는 이 SPI 전송에 실제로 DMA를 붙이는 것 — 근데
+시작하자마자 예상 밖의 질문에 부딪혔다: **지금 코드가 PIO로 도는지 DMA로 도는지조차
+확신할 수 없었다.**
+
+## 컨트롤러가 뭔지부터 몰랐다
+
+`/sys/class/spi_master/spi0/of_node/compatible`을 찍어보니 `snps,dw-apb-ssi`. RPi5의
+SPI 컨트롤러는 브로드컴 자체 IP가 아니라 **Synopsys DesignWare APB SSI**였다 — 구형
+라즈베리파이들이 쓰는 `bcm2835-spi`와는 완전히 다른 칩. 담당 드라이버는
+`drivers/spi/spi-dw-*.c`.
+
+## "DMA 채널이 있다"와 "이 전송이 DMA를 탄다"는 다른 질문
+
+DT 노드에 `dmas`/`dma-names` 프로퍼티가 있는 걸 확인했고, `dmesg`에도 DesignWare AXI
+DMA 컨트롤러가 8채널로 잡혀있는 걸 봤다. DMA 배선 자체는 확실히 있다. 근데 실제로 우리
+전송이 그 경로를 타는지는 완전히 별개 문제였다.
+
+`drivers/spi/spi-dw-dma.c`의 `dw_spi_can_dma()`:
+
+```c
+static bool dw_spi_can_dma(struct spi_controller *host,
+                           struct spi_device *spi, struct spi_transfer *xfer)
+{
+    struct dw_spi *dws = spi_controller_get_devdata(host);
+    if (xfer->len <= dws->fifo_len)
+        return false;   // DMA 대상 아님 → PIO
+    ...
+}
+```
+
+RP1의 FIFO는 31~32워드급인데, 우리 텔레메트리 패킷은 16바이트. **DMA 채널이 배선돼
+있고 컨트롤러가 DMA를 지원해도, 전송 길이가 FIFO 한 번에 다 들어갈 만큼 작으면 SPI
+core가 DMA를 아예 고려조차 안 하고 PIO로 처리한다.** 우리 16바이트 전송은 코드를 아무리
+잘 짜도 이 조건을 절대 못 넘는다.
+
+## 5개를 모아서 80바이트로
+
+해결책은 Nucleo가 샘플 5개(16바이트 × 5 = 80바이트)를 배치로 모았다가 한 번에 버스트
+전송하도록 프로토콜을 바꾸는 것 — data-ready 펄스도 배치가 다 찼을 때 한 번만 쏘도록.
+커널 드라이버 쪽도 전송 길이를 80바이트로 맞췄다.
+
+패딩으로 길이만 늘리는 방법도 있었지만, 의미 없는 더미 바이트로 임계값만 넘기는 것보단
+실제 고속 텔레메트리 드라이버들이 흔히 쓰는 "여러 샘플을 배치로 묶어 인터럽트 오버헤드를
+줄이는" 패턴을 택했다 — 다음 편(mmap 대시보드)에서 이 배치 구조가 그대로 유용하게
+쓰인다.
+
+## 확신은 실측으로 — ftrace로 DMA 경로를 직접 잡다
+
+DMA 채널이 요청돼있다는 사실(`dmaengine/summary`)만으론 "지금 이 순간 쓰이고 있다"는
+증거가 안 된다는 걸 소스(`chan->client_count`가 단순히 예약 여부만 나타냄)로 확인한
+뒤, 더 날카로운 지점으로 ftrace를 걸었다:
+
+```c
+// drivers/spi/spi-dw-core.c
+if (dws->dma_mapped)
+    return dws->dma_ops->dma_transfer(dws, transfer);   // DMA 경로일 때만 호출
+```
+
+```
+$ echo dw_spi_dma_transfer > set_ftrace_filter
+$ echo function > current_tracer
+$ echo 1 > tracing_on
+```
+
+```
+irq/185-kim-spi-1273  [002]  2506.194977: dw_spi_dma_transfer <-dw_spi_transfer_one
+irq/185-kim-spi-1273  [002]  2506.198441: dw_spi_dma_transfer <-dw_spi_transfer_one
+...
+```
+
+호출 스레드가 정확히 우리 `kim-spi` IRQ의 bottom half였다 — 우리 80바이트 배치 전송이
+실제로 DMA 경로를 탄다는 확정적 증거. 연속 호출 간격도 거의 정확히 3.465ms로 일정했는데,
+이게 나중에(Phase 6) 종단 지연을 해석하는 기준값이 된다.
+
+## 로드맵 문구를 정정하다
+
+원래 계획엔 "`dma_map_single`로 CPU 바이트 개입 없이"라고 적혀 있었는데, SPI core
+소스(`spi_map_buf_attrs()`)를 직접 보니 실제로 쓰는 건 `dma_map_sgtable()`(스캐터-게더
+API 경유)이었다. 우리 protocol driver가 이걸 직접 호출하는 일은 없다 — 전부 SPI core
+내부에서 투명하게 일어난다.
+
+`python3`의 `struct.unpack('<20f', ...)`로 80바이트를 float 20개로 복원해 캐시
+코히런시 이상이 없는지도 확인했다 — theta/omega/iq 값이 매끈하게 이어졌다.
+
+다음 편은 이 DMA 완료 데이터를 `read()` 대신 mmap으로 유저스페이스에 zero-copy로
+노출하는 이야기 — 그리고 왜 뮤텍스로는 이 문제를 절대 풀 수 없는지.
