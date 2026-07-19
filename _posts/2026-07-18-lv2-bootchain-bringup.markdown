@@ -1,8 +1,9 @@
 ---
 layout: post
 title: "RPi5 ↔ Nucleo SPI DMA 드라이버 바닥부터 ① — 부트체인, DT 매칭, SPI 브링업"
-date: 2026-07-19 09:00:00 +0900
+date: 2026-07-18 09:00:00 +0900
 categories: driver linux-kernel arm64 spi
+series: 2
 description: "라즈베리파이5에 U-Boot을 직접 얹으면서 겪은 gzip 압축 커널, fdt_addr 캐싱 버그, hush 셸 따옴표 삽질, 그리고 Nucleo와의 첫 SPI 통신까지."
 ---
 

@@ -3,6 +3,7 @@ layout: post
 title: "QEMU로 PCIe 가속기 드라이버 바닥부터 ④ — DMA 삽질기"
 date: 2026-07-12 09:00:00 +0900
 categories: driver linux-kernel dma
+series: 1
 description: "dma_alloc_coherent, 28비트 DMA 마스크, QEMU의 비동기 타이머, 그리고 에러 없이 조용히 실패하던 버스마스터링 누락 버그."
 ---
 

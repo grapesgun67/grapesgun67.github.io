@@ -3,6 +3,7 @@ layout: post
 title: "QEMU로 PCIe 가속기 드라이버 바닥부터 ② — MMIO와 PCI 열거"
 date: 2026-07-10 09:00:00 +0900
 categories: driver linux-kernel pci
+series: 1
 description: "PCI 드라이버의 probe/remove 뼈대, drvdata로 장치 인스턴스별 상태 관리, goto 체인으로 자원 정리하는 커널 관용구를 다룬다."
 ---
 

@@ -1,12 +1,13 @@
 ---
 layout: post
 title: "RPi5 ↔ Nucleo SPI DMA 드라이버 바닥부터 ④ — mmap과 뮤텍스가 안 통하는 이유"
-date: 2026-07-19 09:30:00 +0900
+date: 2026-07-21 09:30:00 +0900
 categories: driver linux-kernel mmap concurrency
+series: 2
 description: "read()가 공짜로 해주던 걸 mmap이 없애버렸을 때, 커널 뮤텍스로는 왜 못 고치는지. seqlock과 스테이징 버퍼 분리로 재시도 확률을 38%에서 사실상 0으로."
 ---
 
-[지난 편]({% post_url 2026-07-19-lv2-spi-dma %})에서 SPI DMA 전송을 확정했으니, 이번
+[지난 편]({% post_url 2026-07-20-lv2-spi-dma %})에서 SPI DMA 전송을 확정했으니, 이번
 편은 그 데이터를 유저스페이스에 zero-copy로 노출하는 이야기다. `read()`+`copy_to_user`를
 mmap으로 바꾸는 게 목표인데, 시작하자마자 "복사만 없애면 되는 거 아닌가?"라는 순진한
 생각이 깨졌다.

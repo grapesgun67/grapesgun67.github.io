@@ -3,10 +3,11 @@ layout: post
 title: "RPi5 ↔ Nucleo SPI DMA 드라이버 바닥부터 ② — 커스텀 캐릭터 드라이버와 GPIO 인터럽트"
 date: 2026-07-19 09:10:00 +0900
 categories: driver linux-kernel spi interrupt
+series: 2
 description: "spidev를 걷어내고 GPIO data-ready 인터럽트 기반 SPI 캐릭터 드라이버로. DT override, vendor prefix 매칭, 그리고 코드도 배선도 멀쩡한데 계속 0만 나오던 며칠."
 ---
 
-[지난 편]({% post_url 2026-07-19-lv2-bootchain-bringup %})에서 `spidev`로 raw 바이트를
+[지난 편]({% post_url 2026-07-18-lv2-bootchain-bringup %})에서 `spidev`로 raw 바이트를
 왕복시키는 데까진 성공했다. 근데 이 방식은 **RPi5가 언제 물어봐야 할지 알 방법이 없다** —
 그냥 아무 때나 클럭을 쳐서 그 순간의 스냅샷을 받아올 뿐이라, 요청과 요청 사이에 갱신된
 값은 그냥 사라진다. 이번 편의 목표는 Nucleo가 "새 데이터 준비됐다"고 먼저 알려주는 이벤트

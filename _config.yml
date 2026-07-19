@@ -1,8 +1,9 @@
-title: "QEMU로 PCIe 가속기 드라이버 바닥부터"
-description: "BSP/디바이스 드라이버 포트폴리오 — QEMU pre-silicon 환경에서 PCIe 가속기 장치 모델과 커널 드라이버를 바닥부터 구현·디버깅한 기록."
+title: "BSP/디바이스 드라이버 바닥부터"
+description: "BSP/디바이스 드라이버 포트폴리오 — QEMU pre-silicon 가상 PCIe 장치부터 RPi5/Nucleo 실물 SPI DMA 드라이버까지, 커널 드라이버를 바닥부터 구현·디버깅한 기록."
 baseurl: ""
 url: "https://grapesgun67.github.io"
 lang: ko
+future: true   # 챕터별 포스트 날짜를 실제 작업 진행에 맞춰 순차 배치하기 위함
 
 # 테마 없이 직접 만든 레이아웃(_layouts/, assets/css/)만 사용
 plugins:

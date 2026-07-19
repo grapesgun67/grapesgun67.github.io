@@ -60,6 +60,18 @@ main.wrap { padding-top: 40px; padding-bottom: 60px; min-height: 60vh; }
 .home-intro p { color: var(--fg-muted); }
 .home-intro a { color: var(--accent); }
 
+/* chapters */
+.chapter + .chapter { margin-top: 48px; }
+.chapter-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--fg);
+  margin: 40px 0 0;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+.chapter:first-of-type .chapter-title { margin-top: 32px; }
+
 /* post list */
 .post-list { list-style: none; padding: 0; margin: 32px 0 0; }
 .post-list-item {
@@ -89,7 +101,6 @@ main.wrap { padding-top: 40px; padding-bottom: 60px; min-height: 60vh; }
 /* post */
 .post-header { margin-bottom: 32px; }
 .post-title { font-size: 1.7rem; margin: 0 0 8px; line-height: 1.35; }
-.post-meta { color: var(--fg-muted); font-size: 0.9rem; margin: 0; }
 
 .post-content h2 {
   font-size: 1.3rem;

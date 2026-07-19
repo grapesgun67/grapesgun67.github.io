@@ -3,6 +3,7 @@ layout: post
 title: "QEMU로 PCIe 가속기 드라이버 바닥부터 ③ — 인터럽트, 그리고 ack를 깜빡했을 때"
 date: 2026-07-11 09:00:00 +0900
 categories: driver linux-kernel interrupts
+series: 1
 description: "공유 IRQ 핸들러 작성, INTx 레벨 신호에서 ack를 빼먹으면 실제로 벌어지는 인터럽트 스톰, 폴링과 completion의 차이."
 ---
 

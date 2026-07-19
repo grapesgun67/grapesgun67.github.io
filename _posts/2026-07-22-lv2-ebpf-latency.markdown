@@ -1,12 +1,13 @@
 ---
 layout: post
 title: "RPi5 ↔ Nucleo SPI DMA 드라이버 바닥부터 ⑤(완) — 존재하지 않았던 256ms 지연"
-date: 2026-07-19 09:40:00 +0900
+date: 2026-07-22 09:40:00 +0900
 categories: driver linux-kernel ebpf bpftrace scheduling
+series: 2
 description: "GPIO 인터럽트부터 SPI DMA 완료까지 종단 지연을 bpftrace로 재다가 만난 긴 꼬리. 가설 세 개를 소스와 실측으로 순서대로 기각하고서야 찾은 진짜 원인."
 ---
 
-[지난 편]({% post_url 2026-07-19-lv2-mmap-seqlock %})으로 드라이버 자체는 완성됐다.
+[지난 편]({% post_url 2026-07-21-lv2-mmap-seqlock %})으로 드라이버 자체는 완성됐다.
 마지막 편은 이 전체 파이프라인 — **GPIO 인터럽트 발생 → 드라이버 스레드가 깨어남 →
 SPI DMA 완료** — 이 실제로 몇 나노초 걸리는지 eBPF(bpftrace)로 재는 이야기다. 그리고
 그 과정에서 만난, 시스템엔 애초에 없었던 256ms짜리 유령 지연을 쫓은 기록.

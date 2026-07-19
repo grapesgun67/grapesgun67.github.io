@@ -3,6 +3,7 @@ layout: post
 title: "QEMU로 PCIe 가속기 드라이버 바닥부터 ① — edu 장치 해부"
 date: 2026-07-09 09:00:00 +0900
 categories: driver qemu pcie
+series: 1
 description: "BSP/디바이스 드라이버 포트폴리오: QEMU edu 장치의 BAR/MMIO, INTx vs MSI, DMA 레지스터 구조를 실제 소스로 해부한다."
 ---
 

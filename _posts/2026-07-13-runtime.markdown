@@ -3,6 +3,7 @@ layout: post
 title: "QEMU로 PCIe 가속기 드라이버 바닥부터 ⑤ — 내 장치 저작, 그리고 런타임"
 date: 2026-07-13 09:00:00 +0900
 categories: driver linux-kernel char-device
+series: 1
 description: "edu를 포크해 내 가속기 장치를 설계하고, char device + ioctl + mmap으로 유저스페이스까지 연결한다. 가장 오래 걸린 버그: NULL이 아니라 ERR_PTR."
 ---
 
@@ -111,6 +112,4 @@ ioctl(fd, _IOC(_IOC_WRITE, 'V', 1, 4), &job)
 ```
 
 QEMU 소스를 읽는 것부터 시작해서, 없는 드라이버를 처음부터 짜고, 없는 하드웨어까지
-직접 설계해본 프로젝트였다. 전체 소스는
-[github.com/grapesgun67/bsp_device_driver](https://github.com/grapesgun67/bsp_device_driver)에
-있다.
+직접 설계해본 프로젝트였다.

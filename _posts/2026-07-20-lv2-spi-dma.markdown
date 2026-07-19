@@ -1,8 +1,9 @@
 ---
 layout: post
 title: "RPi5 ↔ Nucleo SPI DMA 드라이버 바닥부터 ③ — 16바이트는 영원히 PIO였다"
-date: 2026-07-19 09:20:00 +0900
+date: 2026-07-20 09:20:00 +0900
 categories: driver linux-kernel spi dma ftrace
+series: 2
 description: "DMA 채널이 DT에 있어도 전송이 DMA를 안 탈 수 있는 이유. FIFO 임계값을 소스로 찾아내고, ftrace로 PIO→DMA 전환을 실제로 증명하기까지."
 ---
 
