@@ -10,5 +10,25 @@ layout: default
     {{ content }}
   </div>
 
-  <p class="post-back"><a href="{{ '/' | relative_url }}">&larr; 목록으로</a></p>
+  <p class="post-back">
+    <a href="{{ '/' | relative_url }}" id="back-to-list">&larr; 목록으로</a>
+  </p>
+  <script>
+    // 목록 페이지에서 곧장 들어온 경우에만 history.back() — 브라우저가 스크롤
+    // 위치까지 복원해줌. "지난 편"/"다음 편"으로 글끼리 이동해온 경우나 직접
+    // 링크로 들어온 경우는 그냥 '/'로(뒤로가기가 목록이 아니라 이전 글로 갈 수 있어서).
+    (function () {
+      var link = document.getElementById('back-to-list');
+      var homePath = '{{ "/" | relative_url }}';
+      var ref = document.referrer;
+      if (!ref) return;
+      var refPath = new URL(ref).pathname;
+      if (refPath === homePath && history.length > 1) {
+        link.addEventListener('click', function (e) {
+          e.preventDefault();
+          history.back();
+        });
+      }
+    })();
+  </script>
 </article>
