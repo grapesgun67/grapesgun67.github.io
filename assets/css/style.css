@@ -114,14 +114,14 @@ main.wrap { padding-top: 40px; padding-bottom: 60px; min-height: 60vh; }
 .post-content ul, .post-content ol { padding-left: 1.4em; }
 .post-content strong { color: #fff; }
 
-/* demo videos (동시 재생) */
+/* demo videos (동시 재생, 위아래로 크게) */
 .demo-videos {
   display: flex;
-  gap: 16px;
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: 24px;
   margin: 24px 0 0;
 }
-.demo-video-item { flex: 1 1 260px; min-width: 0; }
+.demo-video-item { width: 100%; }
 .demo-video-item video {
   display: block;
   width: 100%;
