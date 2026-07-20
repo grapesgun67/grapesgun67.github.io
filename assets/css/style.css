@@ -114,6 +114,40 @@ main.wrap { padding-top: 40px; padding-bottom: 60px; min-height: 60vh; }
 .post-content ul, .post-content ol { padding-left: 1.4em; }
 .post-content strong { color: #fff; }
 
+/* demo videos (동시 재생) */
+.demo-videos {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin: 24px 0 0;
+}
+.demo-video-item { flex: 1 1 260px; min-width: 0; }
+.demo-video-item video {
+  display: block;
+  width: 100%;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: #000;
+}
+.demo-video-label {
+  color: var(--fg-muted);
+  font-size: 0.85rem;
+  margin: 8px 0 0;
+}
+.demo-play-btn {
+  display: block;
+  margin: 20px auto 0;
+  padding: 10px 22px;
+  background: var(--accent);
+  color: #0d1117;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.demo-play-btn:hover { opacity: 0.85; }
+
 .post-back { margin-top: 48px; }
 .post-back a { color: var(--fg-muted); text-decoration: none; }
 .post-back a:hover { color: var(--accent); }

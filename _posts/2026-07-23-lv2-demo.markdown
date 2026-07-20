@@ -1,0 +1,60 @@
+---
+layout: post
+title: "RPi5 ↔ Nucleo SPI DMA 드라이버 바닥부터 — 번외: 실제 동작 데모"
+date: 2026-07-23 09:00:00 +0900
+categories: driver linux-kernel demo
+series: 2
+description: "Nucleo 시리얼 커맨더로 모터를 직접 움직이는 영상과, 그 데이터가 SPI DMA를 타고 RPi5 웹 대시보드에 실시간으로 뜨는 영상 — 같이 재생해서 전체 파이프라인이 실제로 이어져 있다는 걸 보여준다."
+---
+
+[지난 편]({% post_url 2026-07-22-lv2-ebpf-latency %})까지 5편으로 드라이버 얘기는 끝났는데,
+글로만 봐서는 이게 실제로 물리적으로 이어져 있다는 게 잘 안 와닿을 것 같아서 영상을 두 개
+붙인다.
+
+왼쪽은 Nucleo에 USB 시리얼로 붙어서 SimpleFOC `Commander` 인터페이스로 목표각을 직접
+입력하는 화면(`A<라디안값>` — 임피던스 제어라 목표각으로 스프링처럼 끌려간다), 오른쪽은
+그 순간 RPi5가 SPI DMA로 받아서 mmap+웹소켓으로 띄운 대시보드다. 둘 다 같은 시점을 찍은
+거라, 아래 버튼으로 동시에 재생하면 "커맨드 입력 → 모터가 실제로 움직임 → 그 값이 커널
+드라이버를 거쳐 브라우저 차트에 실시간으로 뜸"까지 한 번에 보인다.
+
+<div class="demo-videos">
+  <div class="demo-video-item">
+    <video id="video-motor" playsinline></video>
+    <p class="demo-video-label">Nucleo 시리얼 커맨더로 모터 제어</p>
+  </div>
+  <div class="demo-video-item">
+    <video id="video-dashboard" playsinline></video>
+    <p class="demo-video-label">RPi5 웹 대시보드 (같은 시점)</p>
+  </div>
+</div>
+<button id="play-both-btn" class="demo-play-btn" type="button">▶ 같이 재생</button>
+
+<script>
+(function () {
+  var v1 = document.getElementById('video-motor');
+  var v2 = document.getElementById('video-dashboard');
+  var btn = document.getElementById('play-both-btn');
+  var videos = [v1, v2];
+
+  v1.src = '{{ "/assets/videos/motor-demo.mp4" | relative_url }}';
+  v2.src = '{{ "/assets/videos/dashboard-demo.mp4" | relative_url }}';
+
+  function playBoth() {
+    videos.forEach(function (v) { v.currentTime = 0; });
+    Promise.all(videos.map(function (v) { return v.play(); })).catch(function () {});
+  }
+
+  btn.addEventListener('click', playBoth);
+
+  videos.forEach(function (v) {
+    v.addEventListener('ended', function () {
+      if (videos.every(function (vv) { return vv.ended; })) {
+        playBoth();
+      }
+    });
+  });
+})();
+</script>
+
+두 영상 다 55초 남짓으로 길이를 맞춰뒀다 — "같이 재생" 누르면 같이 시작하고, 둘 다 끝나면
+자동으로 같이 처음부터 다시 돈다.
