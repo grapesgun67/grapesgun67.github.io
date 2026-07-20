@@ -19,11 +19,11 @@ description: "Nucleo 시리얼 커맨더로 모터를 직접 움직이는 영상
 
 <div class="demo-videos">
   <div class="demo-video-item">
-    <video id="video-motor" playsinline></video>
+    <video id="video-motor" playsinline controls></video>
     <p class="demo-video-label">Nucleo 시리얼 커맨더로 모터 제어</p>
   </div>
   <div class="demo-video-item">
-    <video id="video-dashboard" playsinline></video>
+    <video id="video-dashboard" playsinline controls></video>
     <p class="demo-video-label">RPi5 웹 대시보드 (같은 시점)</p>
   </div>
 </div>
