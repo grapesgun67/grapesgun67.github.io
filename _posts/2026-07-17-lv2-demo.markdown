@@ -19,11 +19,11 @@ description: "Nucleo 시리얼 커맨더로 모터를 직접 움직이는 영상
 
 <div class="demo-videos">
   <div class="demo-video-item">
-    <video id="video-motor" playsinline controls></video>
+    <video id="video-motor" playsinline controls controlsList="nodownload"></video>
     <p class="demo-video-label">Nucleo 시리얼 커맨더로 모터 제어</p>
   </div>
   <div class="demo-video-item">
-    <video id="video-dashboard" playsinline controls></video>
+    <video id="video-dashboard" playsinline controls controlsList="nodownload"></video>
     <p class="demo-video-label">RPi5 웹 대시보드 (같은 시점)</p>
   </div>
 </div>
@@ -35,6 +35,7 @@ description: "Nucleo 시리얼 커맨더로 모터를 직접 움직이는 영상
   var v2 = document.getElementById('video-dashboard');
   var btn = document.getElementById('play-both-btn');
   var videos = [v1, v2];
+  var syncing = false;
 
   v1.src = '{{ "/assets/videos/motor-demo.mp4" | relative_url }}';
   v2.src = '{{ "/assets/videos/dashboard-demo.mp4" | relative_url }}';
@@ -46,18 +47,31 @@ description: "Nucleo 시리얼 커맨더로 모터를 직접 움직이는 영상
 
   btn.addEventListener('click', playBoth);
 
+  // 한쪽을 native controls로 재생/정지하면 다른 쪽도 같이 재생/정지되도록 미러링.
+  // 자연스럽게 끝까지 재생돼서(v.ended) 멈추는 건 "사용자가 정지시킨 것"이 아니므로 제외 —
+  // 그래야 둘 중 하나가 먼저 끝났다고 나머지가 중간에 끊기지 않음.
   videos.forEach(function (v) {
-    v.addEventListener('ended', function () {
-      if (videos.every(function (vv) { return vv.ended; })) {
-        playBoth();
-      }
+    var other = v === v1 ? v2 : v1;
+
+    v.addEventListener('play', function () {
+      if (syncing || !other.paused) return;
+      syncing = true;
+      other.play().catch(function () {}).finally(function () { syncing = false; });
+    });
+
+    v.addEventListener('pause', function () {
+      if (syncing || v.ended || other.paused) return;
+      syncing = true;
+      other.pause();
+      syncing = false;
     });
   });
 })();
 </script>
 
-두 영상 다 55초 남짓으로 길이를 맞춰뒀다 — "같이 재생" 누르면 같이 시작하고, 둘 다 끝나면
-자동으로 같이 처음부터 다시 돈다.
+두 영상 다 35초로 길이를 맞춰뒀다 — "같이 재생"(또는 둘 중 하나의 재생 버튼) 누르면 같이
+시작하고, 한쪽을 멈추면 같이 멈춘다. 끝까지 재생되면 그 자리에 멈춰있고(자동 반복 없음),
+다시 보려면 "같이 재생"을 다시 누르면 된다.
 
 다음 편부터 이 파이프라인을 부트로더부터 하나씩 쌓아올린다 — [다음 편: 부트체인, DT 매칭,
 SPI 브링업]({% post_url 2026-07-18-lv2-bootchain-bringup %}).
