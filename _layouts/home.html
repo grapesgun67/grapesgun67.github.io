@@ -7,6 +7,7 @@ layout: default
 
 {% assign chapter1 = site.posts | where: "series", 1 | sort: "date" %}
 {% assign chapter2 = site.posts | where: "series", 2 | sort: "date" %}
+{% assign chapter3 = site.posts | where: "series", 3 | sort: "date" %}
 {% assign chapter4 = site.posts | where: "series", 4 | sort: "date" %}
 
 <section class="chapter">
@@ -28,6 +29,21 @@ layout: default
   <h2 class="chapter-title">챕터 2 — RPi5 ↔ Nucleo SPI DMA 드라이버</h2>
   <ul class="post-list">
     {% for post in chapter2 %}
+    <li class="post-list-item">
+      <span class="post-list-date">{{ post.date | date: "%Y-%m-%d" }}</span>
+      <a class="post-list-title" href="{{ post.url | relative_url }}">{{ post.title }}</a>
+      {% if post.description %}
+      <p class="post-list-desc">{{ post.description }}</p>
+      {% endif %}
+    </li>
+    {% endfor %}
+  </ul>
+</section>
+
+<section class="chapter">
+  <h2 class="chapter-title">챕터 3 — 카메라/ISP V4L2 드라이버</h2>
+  <ul class="post-list">
+    {% for post in chapter3 %}
     <li class="post-list-item">
       <span class="post-list-date">{{ post.date | date: "%Y-%m-%d" }}</span>
       <a class="post-list-title" href="{{ post.url | relative_url }}">{{ post.title }}</a>
