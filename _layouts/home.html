@@ -9,6 +9,7 @@ layout: default
 {% assign chapter2 = site.posts | where: "series", 2 | sort: "date" %}
 {% assign chapter3 = site.posts | where: "series", 3 | sort: "date" %}
 {% assign chapter4 = site.posts | where: "series", 4 | sort: "date" %}
+{% assign chapter5 = site.posts | where: "series", 5 | sort: "date" %}
 
 <section class="chapter">
   <h2 class="chapter-title">챕터 1 — QEMU PCIe 가속기 드라이버</h2>
@@ -59,6 +60,21 @@ layout: default
   <h2 class="chapter-title">챕터 4 — Zybo 이기종 AMP (remoteproc/RPMsg)</h2>
   <ul class="post-list">
     {% for post in chapter4 %}
+    <li class="post-list-item">
+      <span class="post-list-date">{{ post.date | date: "%Y-%m-%d" }}</span>
+      <a class="post-list-title" href="{{ post.url | relative_url }}">{{ post.title }}</a>
+      {% if post.description %}
+      <p class="post-list-desc">{{ post.description }}</p>
+      {% endif %}
+    </li>
+    {% endfor %}
+  </ul>
+</section>
+
+<section class="chapter">
+  <h2 class="chapter-title">챕터 5 — STM32MP157F-DK2 이기종 AMP (remoteproc/RPMsg/Yocto)</h2>
+  <ul class="post-list">
+    {% for post in chapter5 %}
     <li class="post-list-item">
       <span class="post-list-date">{{ post.date | date: "%Y-%m-%d" }}</span>
       <a class="post-list-title" href="{{ post.url | relative_url }}">{{ post.title }}</a>
