@@ -113,6 +113,29 @@ main.wrap { padding-top: 40px; padding-bottom: 60px; min-height: 60vh; }
 .post-content a { color: var(--accent); }
 .post-content ul, .post-content ol { padding-left: 1.4em; }
 .post-content strong { color: #fff; }
+.post-content { word-break: keep-all; overflow-wrap: break-word; }
+
+/* tables */
+.post-content table {
+  display: block;
+  overflow-x: auto;
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5em 0;
+  font-size: 0.92rem;
+}
+.post-content th, .post-content td {
+  padding: 8px 14px;
+  border: 1px solid var(--border);
+  text-align: left;
+  word-break: keep-all;
+}
+.post-content th {
+  background: var(--bg-alt);
+  font-weight: 700;
+  color: var(--fg);
+  white-space: nowrap;
+}
 
 /* demo images (스크린샷, 나란히) */
 .demo-images {
@@ -131,11 +154,32 @@ main.wrap { padding-top: 40px; padding-bottom: 60px; min-height: 60vh; }
   width: 100%;
   border-radius: 8px;
   border: 1px solid var(--border);
+  cursor: zoom-in;
 }
 .demo-images figcaption {
   color: var(--fg-muted);
   font-size: 0.85rem;
   margin: 8px 0 0;
+}
+
+/* image lightbox (click to enlarge, used on .demo-images img) */
+.lightbox-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.88);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  cursor: zoom-out;
+}
+.lightbox-overlay.active { display: flex; }
+.lightbox-overlay img {
+  max-width: 95vw;
+  max-height: 95vh;
+  border-radius: 6px;
+  border: 1px solid var(--border);
 }
 
 /* demo videos (동시 재생, 위아래로 크게) */

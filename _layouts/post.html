@@ -31,4 +31,28 @@ layout: default
       }
     })();
   </script>
+  <script>
+    // 스크린샷(.demo-images img) 클릭하면 원본 크기에 가깝게 확대해서 보여줌 —
+    // 작게 표시되는 터미널 캡처 등을 실제로 읽을 수 있게.
+    (function () {
+      var images = document.querySelectorAll('.demo-images img');
+      if (!images.length) return;
+      var overlay = document.createElement('div');
+      overlay.className = 'lightbox-overlay';
+      var overlayImg = document.createElement('img');
+      overlay.appendChild(overlayImg);
+      document.body.appendChild(overlay);
+
+      images.forEach(function (el) {
+        el.addEventListener('click', function () {
+          overlayImg.src = el.src;
+          overlayImg.alt = el.alt;
+          overlay.classList.add('active');
+        });
+      });
+      overlay.addEventListener('click', function () {
+        overlay.classList.remove('active');
+      });
+    })();
+  </script>
 </article>

@@ -179,6 +179,9 @@ Done
     <img src="{{ '/assets/images/lv5p6-kallsyms-search-1.png' | relative_url }}" alt="kallsyms grep 결과 1">
     <figcaption>optee/smccc 관련 심볼 탐색</figcaption>
   </figure>
+</div>
+
+<div class="demo-images">
   <figure>
     <img src="{{ '/assets/images/lv5p6-kallsyms-search-2.png' | relative_url }}" alt="kallsyms grep 결과 2">
     <figcaption>__traceiter_optee_invoke_fn_* — 정식 tracepoint를 발견한 순간</figcaption>
