@@ -145,7 +145,7 @@ TA(`ta/secure_storage_ta.c`)와 CA(`host/main.c`) 전부 직접 작성하고, �
 
 <div class="demo-images">
   <figure>
-    <img src="{{ '/assets/videos/lv5p6-ta-ca-output.png' | relative_url }}" alt="GENERATE_KEY→SIGN→GET_PUBKEY 실행 결과">
+    <img src="{{ '/assets/images/lv5p6-ta-ca-output.png' | relative_url }}" alt="GENERATE_KEY→SIGN→GET_PUBKEY 실행 결과">
     <figcaption>보드에서 실행한 최종 결과 — 서명 64바이트, 공개키 64바이트</figcaption>
   </figure>
 </div>
@@ -176,11 +176,11 @@ Done
 
 <div class="demo-images">
   <figure>
-    <img src="{{ '/assets/videos/lv5p6-kallsyms-search-1.png' | relative_url }}" alt="kallsyms grep 결과 1">
+    <img src="{{ '/assets/images/lv5p6-kallsyms-search-1.png' | relative_url }}" alt="kallsyms grep 결과 1">
     <figcaption>optee/smccc 관련 심볼 탐색</figcaption>
   </figure>
   <figure>
-    <img src="{{ '/assets/videos/lv5p6-kallsyms-search-2.png' | relative_url }}" alt="kallsyms grep 결과 2">
+    <img src="{{ '/assets/images/lv5p6-kallsyms-search-2.png' | relative_url }}" alt="kallsyms grep 결과 2">
     <figcaption>__traceiter_optee_invoke_fn_* — 정식 tracepoint를 발견한 순간</figcaption>
   </figure>
 </div>
@@ -192,7 +192,7 @@ Done
 
 <div class="demo-images">
   <figure>
-    <img src="{{ '/assets/videos/lv5p6-tracepoint-format.png' | relative_url }}" alt="tracepoint format 확인">
+    <img src="{{ '/assets/images/lv5p6-tracepoint-format.png' | relative_url }}" alt="tracepoint format 확인">
     <figcaption>args[8] — ARM SMCCC 레지스터 a0~a7 그 자체</figcaption>
   </figure>
 </div>
@@ -212,7 +212,7 @@ cat /sys/kernel/debug/tracing/trace
 
 <div class="demo-images">
   <figure>
-    <img src="{{ '/assets/videos/lv5p6-ftrace-capture.png' | relative_url }}" alt="ftrace 캡처 결과">
+    <img src="{{ '/assets/images/lv5p6-ftrace-capture.png' | relative_url }}" alt="ftrace 캡처 결과">
     <figcaption>실제 캡처 — begin/end 쌍이 반복되는 게 보인다</figcaption>
   </figure>
 </div>

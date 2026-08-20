@@ -66,11 +66,11 @@ delta_cycles, samples[32]}`를 DMA half/full 콜백에서 **리눅스 쪽 트리
 
 <div class="demo-images">
   <figure>
-    <img src="{{ '/assets/videos/lv4mp1-dashboard-initial.png' | relative_url }}" alt="대시보드 초기 화면">
+    <img src="{{ '/assets/images/lv4mp1-dashboard-initial.png' | relative_url }}" alt="대시보드 초기 화면">
     <figcaption>실행 직후 — 배치가 아직 안 쌓인 초기 화면</figcaption>
   </figure>
   <figure>
-    <img src="{{ '/assets/videos/lv4mp1-dashboard-midstream.png' | relative_url }}" alt="대시보드 스트리밍 중 화면">
+    <img src="{{ '/assets/images/lv4mp1-dashboard-midstream.png' | relative_url }}" alt="대시보드 스트리밍 중 화면">
     <figcaption>스트리밍 중 — ADC 파형 + 배치 간격(지터) 차트 + 드롭 카운터</figcaption>
   </figure>
 </div>
